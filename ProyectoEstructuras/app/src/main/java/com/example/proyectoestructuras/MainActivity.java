@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected int playerTurn = 1;
     protected int totalSelectedBoxes = 1;
     protected TreeNode decisionTree;
+    protected int turnos = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
 
         binding.playerOneName.setText(getPlayerOneName);
         binding.playerTwoName.setText(getPlayerTwoName);
+
+        // Mostrar un AlertDialog al inicio del juego para elegir entre "IA" o "Jugador"
+        showChoosePlayerDialog();
+
+        if(playerTurn == 2 && turnos == 0){
+            makeIATurn();
+        }
 
         binding.image1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,39 +128,79 @@ public class MainActivity extends AppCompatActivity {
         decisionTree = generateDecisionTree(boxPositions, true);
     }
 
+    public void showChoosePlayerDialog() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Selecciona quién inicia")
+                .setMessage("¿Quieres jugar contra la IA o contra otro Jugador?")
+                .setPositiveButton("IA", (dialog, which) -> {
+                    playerTurn = 2; // La IA comienza
+                    if (playerTurn == 2 && turnos == 0) {
+                        makeIATurn(); // Si la IA es la que inicia, realiza su primer movimiento
+                    }
+                })
+                .setNegativeButton("Jugador", (dialog, which) -> {
+                    playerTurn = 1; // El jugador comienza
+                })
+                .setCancelable(false)
+                .show();
+    }
+
     public void performAction(ImageView imageView, int selectedBoxPosition) {
+        // Asignamos la jugada del jugador o la IA en el tablero
         boxPositions[selectedBoxPosition] = playerTurn;
 
+        // Si el jugador es el que está jugando
         if (playerTurn == 1) {
-            imageView.setImageResource(R.drawable.xicon);
+            imageView.setImageResource(R.drawable.xicon); // Marca X
+            turnos ++;
+
+            // Verificamos si hay ganador o empate
             if (checkResults()) {
                 showResultDialog("Jugador es el ganador!");
             } else if (totalSelectedBoxes == 9) {
                 showResultDialog("Empate");
             } else {
+                // Cambiamos el turno a la IA
                 changePlayerTurn(2);
                 totalSelectedBoxes++;
 
-                // Turno de la IA (Jugador 2)
-                decisionTree = generateDecisionTree(boxPositions, true);
-                int bestMove = decisionTree.bestMove;
-                if (bestMove != -1) {
-                    ImageView bestMoveView = getImageViewForBox(bestMove);
-                    performAction(bestMoveView, bestMove);
-                }
+                // Llamamos a la IA para que haga su movimiento
+                makeIATurn(); // Realiza la jugada de la IA sin esperar un clic
             }
-        } else {
+        } else if (playerTurn == 2) {
+            turnos ++;
+            // La IA hace su movimiento automáticamente (marca O)
             imageView.setImageResource(R.drawable.oicon);
+
+            // Verificamos si la IA ha ganado o si el juego terminó en empate
             if (checkResults()) {
                 showResultDialog("La máquina es el ganador!");
             } else if (totalSelectedBoxes == 9) {
                 showResultDialog("Empate");
             } else {
+                // Cambiamos el turno al jugador
                 changePlayerTurn(1);
                 totalSelectedBoxes++;
             }
         }
     }
+
+    // Método para hacer que la IA haga su movimiento
+    public void makeIATurn() {
+        // Genera el árbol de decisiones para la IA
+        decisionTree = generateDecisionTree(boxPositions, true);
+
+        // Obtén el mejor movimiento de la IA
+        int bestMove = decisionTree.bestMove;
+
+        if (bestMove != -1) {
+            // Realiza la jugada de la IA en el tablero
+            ImageView bestMoveView = getImageViewForBox(bestMove);
+            performAction(bestMoveView, bestMove); // Realiza la jugada sin esperar clics
+        }
+    }
+
+
 
     public void changePlayerTurn(int currentPlayerTurn) {
         playerTurn = currentPlayerTurn;
@@ -196,6 +244,10 @@ public class MainActivity extends AppCompatActivity {
         binding.image9.setImageResource(R.drawable.cajablanca);
 
         decisionTree = generateDecisionTree(boxPositions, true);
+        showChoosePlayerDialog();
+        if(playerTurn == 2 && turnos == 0){
+            makeIATurn();
+        }
     }
 
     public TreeNode generateDecisionTree(int[] state, boolean isMaximizing) {
