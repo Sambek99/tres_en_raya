@@ -1,9 +1,9 @@
 package com.example.proyectoestructuras;
 
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -15,10 +15,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
-    private final List<int[]> combinationList = new ArrayList<>();
-    private int[] boxPositions = {0,0,0,0,0,0,0,0,0}; //9 zero
-    private int playerTurn = 1;
-    private int totalSelectedBoxes = 1;
+    protected final List<int[]> combinationList = new ArrayList<>();
+    protected int[] boxPositions = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    protected int playerTurn = 1;
+    protected int totalSelectedBoxes = 1;
+    protected TreeNode decisionTree;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,14 +27,14 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        combinationList.add(new int[] {0,1,2});
-        combinationList.add(new int[] {3,4,5});
-        combinationList.add(new int[] {6,7,8});
-        combinationList.add(new int[] {0,3,6});
-        combinationList.add(new int[] {1,4,7});
-        combinationList.add(new int[] {2,5,8});
-        combinationList.add(new int[] {2,4,6});
-        combinationList.add(new int[] {0,4,8});
+        combinationList.add(new int[]{0, 1, 2});
+        combinationList.add(new int[]{3, 4, 5});
+        combinationList.add(new int[]{6, 7, 8});
+        combinationList.add(new int[]{0, 3, 6});
+        combinationList.add(new int[]{1, 4, 7});
+        combinationList.add(new int[]{2, 5, 8});
+        combinationList.add(new int[]{2, 4, 6});
+        combinationList.add(new int[]{0, 4, 8});
 
         String getPlayerOneName = "JUGADOR";
         String getPlayerTwoName = "MAQUINA";
@@ -115,27 +116,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        decisionTree = generateDecisionTree(boxPositions, true);
     }
 
-    private void performAction(ImageView imageView, int selectedBoxPosition) {
+    public void performAction(ImageView imageView, int selectedBoxPosition) {
         boxPositions[selectedBoxPosition] = playerTurn;
 
         if (playerTurn == 1) {
             imageView.setImageResource(R.drawable.xicon);
             if (checkResults()) {
-                ResultDialog resultDialog = new ResultDialog(MainActivity.this,  "Jugador es el ganador!", MainActivity.this);
-                resultDialog.setCancelable(false);
-                resultDialog.show();
+                showResultDialog("Jugador es el ganador!");
             } else if (totalSelectedBoxes == 9) {
-                ResultDialog resultDialog = new ResultDialog(MainActivity.this, "Empate", MainActivity.this);
-                resultDialog.setCancelable(false);
-                resultDialog.show();
+                showResultDialog("Empate");
             } else {
                 changePlayerTurn(2);
                 totalSelectedBoxes++;
 
                 // Turno de la IA (Jugador 2)
-                int bestMove = getBestMove();
+                decisionTree = generateDecisionTree(boxPositions, true);
+                int bestMove = decisionTree.bestMove;
                 if (bestMove != -1) {
                     ImageView bestMoveView = getImageViewForBox(bestMove);
                     performAction(bestMoveView, bestMove);
@@ -144,13 +144,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             imageView.setImageResource(R.drawable.oicon);
             if (checkResults()) {
-                ResultDialog resultDialog = new ResultDialog(MainActivity.this,  "La maquina es el Ganador!", MainActivity.this);
-                resultDialog.setCancelable(false);
-                resultDialog.show();
+                showResultDialog("La máquina es el ganador!");
             } else if (totalSelectedBoxes == 9) {
-                ResultDialog resultDialog = new ResultDialog(MainActivity.this, "Empate", MainActivity.this);
-                resultDialog.setCancelable(false);
-                resultDialog.show();
+                showResultDialog("Empate");
             } else {
                 changePlayerTurn(1);
                 totalSelectedBoxes++;
@@ -158,8 +154,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    private void changePlayerTurn(int currentPlayerTurn) {
+    public void changePlayerTurn(int currentPlayerTurn) {
         playerTurn = currentPlayerTurn;
         if (playerTurn == 1) {
             binding.playerOneLayout.setBackgroundResource(R.drawable.bordenegro);
@@ -170,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private boolean checkResults() {
+    public boolean checkResults() {
         for (int[] combination : combinationList) {
             if (boxPositions[combination[0]] != 0 &&
                     boxPositions[combination[0]] == boxPositions[combination[1]] &&
@@ -181,17 +176,12 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-
     private boolean isBoxSelectable(int boxPosition) {
-        boolean response = false;
-        if (boxPositions[boxPosition] == 0) {
-            response = true;
-        }
-        return response;
+        return boxPositions[boxPosition] == 0;
     }
 
-    public void restartMatch(){
-        boxPositions = new int[] {0,0,0,0,0,0,0,0,0}; //9 zero
+    public void restartMatch() {
+        boxPositions = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
         playerTurn = 1;
         totalSelectedBoxes = 1;
 
@@ -204,125 +194,110 @@ public class MainActivity extends AppCompatActivity {
         binding.image7.setImageResource(R.drawable.cajablanca);
         binding.image8.setImageResource(R.drawable.cajablanca);
         binding.image9.setImageResource(R.drawable.cajablanca);
+
+        decisionTree = generateDecisionTree(boxPositions, true);
     }
 
-    private int getBestMove() {
-        // Prioridad 1: Verificar si la máquina puede ganar
-        for (int i = 0; i < boxPositions.length; i++) {
-            if (isBoxSelectable(i)) {
-                boxPositions[i] = 2;
-                if (checkResults()) {
-                    boxPositions[i] = 0;
-                    return i;
-                }
-                boxPositions[i] = 0;
-            }
+    public TreeNode generateDecisionTree(int[] state, boolean isMaximizing) {
+        TreeNode root = new TreeNode(state.clone(), -1);
+        generateTree(root, isMaximizing, 0);
+        return root;
+    }
+
+    public void generateTree(TreeNode node, boolean isMaximizing, int depth) {
+        if (checkWinner(node.state, 1) || checkWinner(node.state, 2) || isBoardFull(node.state)) {
+            node.value = evaluateState(node.state, depth);
+            return;
         }
 
-        // Prioridad 2: Bloquear al jugador si está a punto de ganar
-        for (int i = 0; i < boxPositions.length; i++) {
-            if (isBoxSelectable(i)) {
-                boxPositions[i] = 1;
-                if (checkResults()) {
-                    boxPositions[i] = 0;
-                    return i; // Bloquea inmediatamente
-                }
-                boxPositions[i] = 0;
-            }
-        }
+        int bestValue = isMaximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-        // Prioridad 3: Usar minimax para encontrar el mejor movimiento
-        int bestScore = Integer.MAX_VALUE;
-        int bestMove = -1;
+        for (int i = 0; i < node.state.length; i++) {
+            if (node.state[i] == 0) {
+                int[] newState = node.state.clone();
+                newState[i] = isMaximizing ? 2 : 1;
 
-        for (int i = 0; i < boxPositions.length; i++) {
-            if (isBoxSelectable(i)) {
-                boxPositions[i] = 2;
-                int score = minimax(false);
-                boxPositions[i] = 0;
+                TreeNode child = new TreeNode(newState, i);
+                generateTree(child, !isMaximizing, depth + 1);
 
-                if (score < bestScore) {
-                    bestScore = score;
-                    bestMove = i;
+                node.children.add(child);
+                if (isMaximizing) {
+                    if (child.value > bestValue) {
+                        bestValue = child.value;
+                        node.bestMove = i;
+                    }
+                } else {
+                    if (child.value < bestValue) {
+                        bestValue = child.value;
+                        node.bestMove = i;
+                    }
                 }
             }
         }
-        return bestMove;
+        node.value = bestValue;
     }
 
-
-    private int minimax(boolean isMaximizing) {
-        if (checkResults()) {
-            return isMaximizing ? -10 : 10; // Si gana el jugador 1: -10, si gana la IA: +10
-        }
-        if (totalSelectedBoxes == 9) {
-            return 0; // Empate
-        }
-
-        int bestScore = isMaximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        int currentPlayer = isMaximizing ? 1 : 2;
-
-        for (int i = 0; i < boxPositions.length; i++) {
-            if (isBoxSelectable(i)) {
-                boxPositions[i] = currentPlayer; // Simula el movimiento
-                totalSelectedBoxes++;
-
-                int score = minimax(!isMaximizing);
-
-                // Incluir utilidad en la evaluación
-                score += calculateUtility(currentPlayer);
-
-                boxPositions[i] = 0; // Deshacer el movimiento
-                totalSelectedBoxes--;
-
-                bestScore = isMaximizing ? Math.max(bestScore, score) : Math.min(bestScore, score);
-            }
-        }
-        return bestScore;
+    public int evaluateState(int[] state, int depth) {
+        if (checkWinner(state, 2)) return 10 - depth;
+        if (checkWinner(state, 1)) return depth - 10;
+        return 0;
     }
 
-    private ImageView getImageViewForBox(int boxPosition) {
-        switch (boxPosition) {
-            case 0: return binding.image1;
-            case 1: return binding.image2;
-            case 2: return binding.image3;
-            case 3: return binding.image4;
-            case 4: return binding.image5;
-            case 5: return binding.image6;
-            case 6: return binding.image7;
-            case 7: return binding.image8;
-            case 8: return binding.image9;
-            default: return null;
-        }
-    }
-    private int calculateUtility(int currentPlayer) {
-        int playerScore = 0, opponentScore = 0;
+    public boolean checkWinner(int[] state, int player) {
         for (int[] combination : combinationList) {
-            int playerCount = 0, opponentCount = 0;
-
-            for (int position : combination) {
-                if (boxPositions[position] == currentPlayer) {
-                    playerCount++;
-                } else if (boxPositions[position] != 0) {
-                    opponentCount++;
-                }
-            }
-
-            if (opponentCount == 0) {
-                playerScore++;
-            }
-
-            // Si el jugador ocupa una casilla, esa combinación no es utilizable para el oponente
-            if (playerCount == 0) {
-                opponentScore++;
+            if (state[combination[0]] == player &&
+                    state[combination[1]] == player &&
+                    state[combination[2]] == player) {
+                return true;
             }
         }
-
-        // Calcular utilidad: Diferencia entre opciones disponibles
-        return playerScore - opponentScore;
+        return false;
     }
 
+    public boolean isBoardFull(int[] state) {
+        for (int position : state) {
+            if (position == 0) return false;
+        }
+        return true;
+    }
 
+    public ImageView getImageViewForBox(int boxPosition) {
+        switch (boxPosition) {
+            case 0:
+                return binding.image1;
+            case 1:
+                return binding.image2;
+            case 2:
+                return binding.image3;
+            case 3:
+                return binding.image4;
+            case 4:
+                return binding.image5;
+            case 5:
+                return binding.image6;
+            case 6:
+                return binding.image7;
+            case 7:
+                return binding.image8;
+            case 8:
+                return binding.image9;
+            default:
+                return null;
+        }
+    }
 
-
+    public void showResultDialog(String message) {
+        runOnUiThread(() -> {
+            try {
+                Log.d("DEBUG", "Mostrando el diálogo: " + message);
+                if (!isFinishing() && !isDestroyed()) {
+                    ResultDialog resultDialog = new ResultDialog(MainActivity.this, message, MainActivity.this);
+                    resultDialog.setCancelable(false);
+                    resultDialog.show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 }

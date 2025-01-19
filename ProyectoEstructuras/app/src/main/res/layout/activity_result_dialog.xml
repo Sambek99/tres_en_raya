@@ -34,5 +34,17 @@
             android:layout_margin="20dp"
             android:textColor="@color/Lavender"
             app:cornerRadius = "20dp"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:id="@+id/menuboton"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/white"
+            android:text="Menu"
+            android:layout_margin="20dp"
+            android:textColor="@color/Lavender"
+            app:cornerRadius = "20dp"/>
+
     </LinearLayout>
 </RelativeLayout>

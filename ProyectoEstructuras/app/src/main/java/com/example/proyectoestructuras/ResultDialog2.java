@@ -1,7 +1,5 @@
 package com.example.proyectoestructuras;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -13,14 +11,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-public class ResultDialog extends Dialog {
+public class ResultDialog2 extends Dialog {
 
     private final String message;
-    private final MainActivity mainActivity;
-
+    private final MainActivity3 mainActivity;
     private final Context context;
 
-    public ResultDialog(@NonNull Context context, String message, MainActivity mainActivity) {
+
+    //Context miContext;
+
+    public ResultDialog2(@NonNull Context context, String message, MainActivity3 mainActivity) {
         super(context);
         this.context=context;
         this.message = message;
@@ -51,10 +51,9 @@ public class ResultDialog extends Dialog {
                 Intent intent = new Intent(context, AddPlayers.class);
                 context.startActivity(intent);
 
-                // Cierra el diálogo y la actividad actual
                 dismiss();
                 if (context instanceof Activity) {
-                    ((Activity) context).finish(); // Finaliza la actividad actual para limpiar la pila
+                    ((Activity) context).finish();
                 }
             }
         });
