@@ -1,7 +1,10 @@
 package com.example.proyectoestructuras;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity2 extends MainActivity {
 
@@ -10,8 +13,6 @@ public class MainActivity2 extends MainActivity {
         super.onCreate(savedInstanceState);
         binding.playerOneName.setText("IA 1");
         binding.playerTwoName.setText("IA 2");
-
-        // Inicia el juego IA vs IA
         decisionTree = generateDecisionTree(boxPositions, true);
         startAIvsAIGame();
     }
@@ -70,5 +71,20 @@ public class MainActivity2 extends MainActivity {
 
     private boolean isGameOver() {
         return checkResults() || totalSelectedBoxes == 9;
+    }
+
+    public void showResultDialog(String message) {
+        runOnUiThread(() -> {
+            try {
+                Log.d("DEBUG", "Mostrando el diálogo: " + message);
+                if (!isFinishing() && !isDestroyed()) {
+                    ResultDialogMenu resultDialog = new ResultDialogMenu(MainActivity2.this, message, MainActivity2.this);
+                    resultDialog.setCancelable(false);
+                    resultDialog.show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

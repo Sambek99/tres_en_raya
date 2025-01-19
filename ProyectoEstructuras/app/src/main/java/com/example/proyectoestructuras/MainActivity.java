@@ -43,8 +43,10 @@ public class MainActivity extends AppCompatActivity {
         binding.playerOneName.setText(getPlayerOneName);
         binding.playerTwoName.setText(getPlayerTwoName);
 
-        // Mostrar un AlertDialog al inicio del juego para elegir entre "IA" o "Jugador"
-        showChoosePlayerDialog();
+        if (this.getClass() == MainActivity.class) {
+            showChoosePlayerDialog();
+        }
+
 
         if(playerTurn == 2 && turnos == 0){
             makeIATurn();
@@ -126,12 +128,15 @@ public class MainActivity extends AppCompatActivity {
 
 
         decisionTree = generateDecisionTree(boxPositions, true);
+
+
+
     }
 
     public void showChoosePlayerDialog() {
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Selecciona quién inicia")
-                .setMessage("¿Quieres jugar contra la IA o contra otro Jugador?")
+                .setMessage("IA o Jugador?")
                 .setPositiveButton("IA", (dialog, which) -> {
                     playerTurn = 2; // La IA comienza
                     if (playerTurn == 2 && turnos == 0) {

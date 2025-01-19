@@ -18,6 +18,11 @@
             tools:ignore="Instantiatable" />
 
         <activity
+            android:name=".ResultDialogMenu"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+
+        <activity
             android:name=".ResultDialog2"
             android:exported="true"
             tools:ignore="Instantiatable" />
