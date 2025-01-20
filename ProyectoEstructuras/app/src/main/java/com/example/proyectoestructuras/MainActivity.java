@@ -21,12 +21,16 @@ public class MainActivity extends AppCompatActivity {
     protected int totalSelectedBoxes = 1;
     protected TreeNode decisionTree;
     protected int turnos = 0;
+    //protected boolean finishes = false;
+    int Playericon = R.drawable.xicon;
+    int IAicon=R.drawable.oicon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
 
         combinationList.add(new int[]{0, 1, 2});
         combinationList.add(new int[]{3, 4, 5});
@@ -37,100 +41,128 @@ public class MainActivity extends AppCompatActivity {
         combinationList.add(new int[]{2, 4, 6});
         combinationList.add(new int[]{0, 4, 8});
 
+
         String getPlayerOneName = "JUGADOR";
         String getPlayerTwoName = "MAQUINA";
 
         binding.playerOneName.setText(getPlayerOneName);
         binding.playerTwoName.setText(getPlayerTwoName);
 
+
         if (this.getClass() == MainActivity.class) {
-            showChoosePlayerDialog();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showChoosePlayerDialog();
+                    showChooseIconDialog();
+                }
+            });
+
+
+
+
+            binding.image1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(0)) {
+                        performAction((ImageView) view, 0);
+                    }
+                }
+            });
+
+            binding.image2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(1)) {
+                        performAction((ImageView) view, 1);
+                    }
+                }
+            });
+            binding.image3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(2)) {
+                        performAction((ImageView) view, 2);
+                    }
+                }
+            });
+            binding.image4.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(3)) {
+                        performAction((ImageView) view, 3);
+                    }
+                }
+            });
+            binding.image5.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(4)) {
+                        performAction((ImageView) view, 4);
+                    }
+                }
+            });
+            binding.image6.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(5)) {
+                        performAction((ImageView) view, 5);
+                    }
+                }
+            });
+            binding.image7.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(6)) {
+                        performAction((ImageView) view, 6);
+                    }
+                }
+            });
+            binding.image8.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(7)) {
+                        performAction((ImageView) view, 7);
+                    }
+                }
+            });
+            binding.image9.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isBoxSelectable(8)) {
+                        performAction((ImageView) view, 8);
+                    }
+                }
+            });
+
+
+            decisionTree = generateDecisionTree(boxPositions, true);
+
+
+        //}
         }
+    }
 
+    public void showChooseIconDialog() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("QUE FICHA QUIERES SER")
+                .setMessage("X / O?")
+                .setPositiveButton("O", (dialog, which) -> {
+                    Playericon=R.drawable.oicon;
+                    IAicon=R.drawable.xicon;
+                    binding.jugador1.setImageResource(Playericon);
+                    binding.jugador2.setImageResource(IAicon);
 
-        /*if(playerTurn == 2 && turnos == 0){
-            makeIATurn();
-        }*/
-
-        binding.image1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(0)){
-                    performAction((ImageView) view, 0);
-                }
-            }
-        });
-
-        binding.image2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(1)){
-                    performAction((ImageView) view, 1);
-                }
-            }
-        });
-        binding.image3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(2)){
-                    performAction((ImageView) view, 2);
-                }
-            }
-        });
-        binding.image4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(3)){
-                    performAction((ImageView) view, 3);
-                }
-            }
-        });
-        binding.image5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(4)){
-                    performAction((ImageView) view, 4);
-                }
-            }
-        });
-        binding.image6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(5)){
-                    performAction((ImageView) view, 5);
-                }
-            }
-        });
-        binding.image7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(6)){
-                    performAction((ImageView) view, 6);
-                }
-            }
-        });
-        binding.image8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(7)){
-                    performAction((ImageView) view, 7);
-                }
-            }
-        });
-        binding.image9.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isBoxSelectable(8)){
-                    performAction((ImageView) view, 8);
-                }
-            }
-        });
-
-
-        decisionTree = generateDecisionTree(boxPositions, true);
-
-
-
+                })
+                .setNegativeButton("X", (dialog, which) -> {
+                    Playericon=R.drawable.xicon;
+                    IAicon=R.drawable.oicon;
+                    binding.jugador1.setImageResource(Playericon);
+                    binding.jugador2.setImageResource(IAicon);
+                })
+                .setCancelable(false)
+                .show();
+        //finishes=true;
     }
 
     public void showChoosePlayerDialog() {
@@ -156,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Si el jugador es el que está jugando
         if (playerTurn == 1) {
-            imageView.setImageResource(R.drawable.xicon); // Marca X
+            imageView.setImageResource(Playericon); // Marca X
             turnos ++;
 
             // Verificamos si hay ganador o empate
@@ -174,8 +206,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (playerTurn == 2) {
             turnos ++;
-            // La IA hace su movimiento automáticamente (marca O)
-            imageView.setImageResource(R.drawable.oicon);
+            imageView.setImageResource(IAicon);
 
             // Verificamos si la IA ha ganado o si el juego terminó en empate
             if (checkResults()) {
@@ -229,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    private boolean isBoxSelectable(int boxPosition) {
+    protected boolean isBoxSelectable(int boxPosition) {
         return boxPositions[boxPosition] == 0;
     }
 
@@ -247,6 +278,8 @@ public class MainActivity extends AppCompatActivity {
         binding.image9.setImageResource(R.drawable.cajablanca);
         decisionTree = generateDecisionTree(boxPositions, true);
         showChoosePlayerDialog();
+        showChooseIconDialog();
+        //finishes=false;
 
     }
 

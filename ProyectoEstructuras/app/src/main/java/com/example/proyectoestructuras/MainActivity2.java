@@ -2,6 +2,7 @@ package com.example.proyectoestructuras;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,10 +12,19 @@ public class MainActivity2 extends MainActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //finishes=true;
         super.onCreate(savedInstanceState);
         binding.playerOneName.setText("IA 1");
         binding.playerTwoName.setText("IA 2");
         decisionTree = generateDecisionTree(boxPositions, true);
+        binding.image9.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isBoxSelectable(8)) {
+                    performAction((ImageView) view, 8);
+                }
+            }
+        });
         startAIvsAIGame();
     }
 
@@ -72,7 +82,7 @@ public class MainActivity2 extends MainActivity {
     }
 
     private boolean isGameOver() {
-        return checkResults() || totalSelectedBoxes == 9;
+        return /*checkResults() ||*/ totalSelectedBoxes == 9;
     }
 
     public void showResultDialog(String message) {
