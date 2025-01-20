@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity2 extends MainActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,6 +19,7 @@ public class MainActivity2 extends MainActivity {
     }
 
     private void startAIvsAIGame() {
+        playerTurn=1;
         new Thread(() -> {
             while (!isGameOver()) {
                 runOnUiThread(() -> {

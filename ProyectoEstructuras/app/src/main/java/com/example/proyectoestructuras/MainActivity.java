@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     protected final List<int[]> combinationList = new ArrayList<>();
     protected int[] boxPositions = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    protected int playerTurn = 1;
+    protected int playerTurn;
     protected int totalSelectedBoxes = 1;
     protected TreeNode decisionTree;
     protected int turnos = 0;
@@ -48,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        if(playerTurn == 2 && turnos == 0){
+        /*if(playerTurn == 2 && turnos == 0){
             makeIATurn();
-        }
+        }*/
 
         binding.image1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,12 +136,12 @@ public class MainActivity extends AppCompatActivity {
     public void showChoosePlayerDialog() {
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Selecciona quién inicia")
-                .setMessage("IA o Jugador?")
+                .setMessage("Jugador o IA?")
                 .setPositiveButton("IA", (dialog, which) -> {
                     playerTurn = 2; // La IA comienza
-                    if (playerTurn == 2 && turnos == 0) {
-                        makeIATurn(); // Si la IA es la que inicia, realiza su primer movimiento
-                    }
+                    turnos=0;
+                        makeIATurn();
+                        changePlayerTurn(1);// Si la IA es la que inicia, realiza su primer movimiento
                 })
                 .setNegativeButton("Jugador", (dialog, which) -> {
                     playerTurn = 1; // El jugador comienza
@@ -235,9 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void restartMatch() {
         boxPositions = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-        playerTurn = 1;
         totalSelectedBoxes = 1;
-
         binding.image1.setImageResource(R.drawable.cajablanca);
         binding.image2.setImageResource(R.drawable.cajablanca);
         binding.image3.setImageResource(R.drawable.cajablanca);
@@ -247,12 +245,9 @@ public class MainActivity extends AppCompatActivity {
         binding.image7.setImageResource(R.drawable.cajablanca);
         binding.image8.setImageResource(R.drawable.cajablanca);
         binding.image9.setImageResource(R.drawable.cajablanca);
-
         decisionTree = generateDecisionTree(boxPositions, true);
         showChoosePlayerDialog();
-        if(playerTurn == 2 && turnos == 0){
-            makeIATurn();
-        }
+
     }
 
     public TreeNode generateDecisionTree(int[] state, boolean isMaximizing) {
