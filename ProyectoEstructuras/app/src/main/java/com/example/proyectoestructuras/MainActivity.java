@@ -289,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
         return root;
     }
 
+    //minimax
     public void generateTree(TreeNode node, boolean isMaximizing, int depth) {
         if (checkWinner(node.state, 1) || checkWinner(node.state, 2) || isBoardFull(node.state)) {
             node.value = evaluateState(node.state, depth);
