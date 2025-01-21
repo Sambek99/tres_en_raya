@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
 
-            decisionTree = generarArbolDecisiones(boxPositions, true);
+            decisionTree = generateDecisionTree(boxPositions, true);
 
 
         //}
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
     // Método para hacer que la IA haga su movimiento
     public void makeIATurn() {
         // Genera el árbol de decisiones para la IA
-        decisionTree = generarArbolDecisiones(boxPositions, true);
+        decisionTree = generateDecisionTree(boxPositions, true);
 
         // Obtén el mejor movimiento de la IA
         int bestMove = decisionTree.bestMove;
@@ -276,14 +276,14 @@ public class MainActivity extends AppCompatActivity {
         binding.image7.setImageResource(R.drawable.cajablanca);
         binding.image8.setImageResource(R.drawable.cajablanca);
         binding.image9.setImageResource(R.drawable.cajablanca);
-        decisionTree = generarArbolDecisiones(boxPositions, true);
+        decisionTree = generateDecisionTree(boxPositions, true);
         showChoosePlayerDialog();
         showChooseIconDialog();
         //finishes=false;
 
     }
 
-    public TreeNode generarArbolDecisiones(int[] state, boolean isMaximizing) {
+    public TreeNode generateDecisionTree(int[] state, boolean isMaximizing) {
         TreeNode root = new TreeNode(state.clone(), -1);
         minimax(root, isMaximizing, 0);
         return root;
