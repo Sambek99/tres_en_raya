@@ -16,7 +16,7 @@ public class MainActivity2 extends MainActivity {
         super.onCreate(savedInstanceState);
         binding.playerOneName.setText("IA 1");
         binding.playerTwoName.setText("IA 2");
-        decisionTree = generateDecisionTree(boxPositions, true);
+        decisionTree = generarArbolDecisiones(boxPositions, true);
         binding.image9.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,8 +62,7 @@ public class MainActivity2 extends MainActivity {
                 changePlayerTurn(2);
                 totalSelectedBoxes++;
 
-                // Genera el árbol de decisiones para IA 2
-                decisionTree = generateDecisionTree(boxPositions, true);
+                decisionTree = generarArbolDecisiones(boxPositions, true);
             }
         } else {
             imageView.setImageResource(R.drawable.oicon);
@@ -75,8 +74,7 @@ public class MainActivity2 extends MainActivity {
                 changePlayerTurn(1);
                 totalSelectedBoxes++;
 
-                // Genera el árbol de decisiones para IA 1
-                decisionTree = generateDecisionTree(boxPositions, true);
+                decisionTree = generarArbolDecisiones(boxPositions, true);
             }
         }
     }

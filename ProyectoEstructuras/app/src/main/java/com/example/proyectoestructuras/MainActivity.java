@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
 
-            decisionTree = generateDecisionTree(boxPositions, true);
+            decisionTree = generarArbolDecisiones(boxPositions, true);
 
 
         //}
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
     // Método para hacer que la IA haga su movimiento
     public void makeIATurn() {
         // Genera el árbol de decisiones para la IA
-        decisionTree = generateDecisionTree(boxPositions, true);
+        decisionTree = generarArbolDecisiones(boxPositions, true);
 
         // Obtén el mejor movimiento de la IA
         int bestMove = decisionTree.bestMove;
@@ -276,23 +276,23 @@ public class MainActivity extends AppCompatActivity {
         binding.image7.setImageResource(R.drawable.cajablanca);
         binding.image8.setImageResource(R.drawable.cajablanca);
         binding.image9.setImageResource(R.drawable.cajablanca);
-        decisionTree = generateDecisionTree(boxPositions, true);
+        decisionTree = generarArbolDecisiones(boxPositions, true);
         showChoosePlayerDialog();
         showChooseIconDialog();
         //finishes=false;
 
     }
 
-    public TreeNode generateDecisionTree(int[] state, boolean isMaximizing) {
+    public TreeNode generarArbolDecisiones(int[] state, boolean isMaximizing) {
         TreeNode root = new TreeNode(state.clone(), -1);
-        generateTree(root, isMaximizing, 0);
+        minimax(root, isMaximizing, 0);
         return root;
     }
 
     //minimax
-    public void generateTree(TreeNode node, boolean isMaximizing, int depth) {
+    public void minimax(TreeNode node, boolean isMaximizing, int depth) {
         if (checkWinner(node.state, 1) || checkWinner(node.state, 2) || isBoardFull(node.state)) {
-            node.value = evaluateState(node.state, depth);
+            node.value = utilidad(node.state, depth);
             return;
         }
 
@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 newState[i] = isMaximizing ? 2 : 1;
 
                 TreeNode child = new TreeNode(newState, i);
-                generateTree(child, !isMaximizing, depth + 1);
+                minimax(child, !isMaximizing, depth + 1);
 
                 node.children.add(child);
                 if (isMaximizing) {
@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
         node.value = bestValue;
     }
 
-    public int evaluateState(int[] state, int depth) {
+    public int utilidad(int[] state, int depth) {
         if (checkWinner(state, 2)) return 10 - depth;
         if (checkWinner(state, 1)) return depth - 10;
         return 0;
